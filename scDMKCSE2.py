@@ -8,7 +8,7 @@ from multiprocessing import Pool
 import numpy as np
 import sklearn
 from scipy.sparse import csgraph
-# from kmeans_pytorch import kmeans
+from kmeans_pytorch import kmeans
 from sklearn import cluster
 from sklearn.cluster import KMeans,spectral_clustering
 from sklearn.metrics.cluster import normalized_mutual_info_score as nmi_score
@@ -367,10 +367,10 @@ def train_scDKC(runtime, y, datasetname, device, adata):
             res1 = tmp_q.cpu().numpy().argmax(1)  # Q
             # y_pred1,dist = kernel_kmeans(k.detach().cpu().numpy(), args.n_clusters)
             # y_pred,dist = kernel_kmeans(k, args.n_clusters)
-            kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
-            y_pred1 = kmeans.fit_predict(k.data.cpu().numpy())
-            # y_pred1, _ = kmeans(k, num_clusters=args.n_clusters,  device=device)
-            # y_pred1 = y_pred1.data.cpu().numpy()
+            # kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
+            # y_pred1 = kmeans.fit_predict(k.data.cpu().numpy())
+            y_pred1, _ = kmeans(k, num_clusters=args.n_clusters,  device=device)
+            y_pred1 = y_pred1.data.cpu().numpy()
 
             # pdatas = { 'k': k,'z': z}
             # eva1(y, y_pred1, pdatas, str(epoch) + 'Q', runtime, datasetname)
