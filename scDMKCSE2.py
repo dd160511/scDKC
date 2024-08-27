@@ -8,7 +8,7 @@ from multiprocessing import Pool
 import numpy as np
 import sklearn
 from scipy.sparse import csgraph
-from kmeans_pytorch import kmeans
+# from kmeans_pytorch import kmeans
 from sklearn import cluster
 from sklearn.cluster import KMeans,spectral_clustering
 from sklearn.metrics.cluster import normalized_mutual_info_score as nmi_score
@@ -81,11 +81,11 @@ def dot_product_decode(Z):
     return A_pred
 
 
-class SDCN(nn.Module):
+class scDKC(nn.Module):
 
     def __init__(self, n_enc_1, n_enc_2, n_enc_3, n_dec_1, n_dec_2, n_dec_3,
                  n_input, n_z, n_clusters, v=2):
-        super(SDCN, self).__init__()
+        super(scDKC, self).__init__()
 
         # autoencoder for intra information
         self.ae = AE(
@@ -329,9 +329,9 @@ def target_distribution(q):
 from graph_function import *
 
 
-def train_sdcn(runtime, y, datasetname, device, adata):
+def train_scDKC(runtime, y, datasetname, device, adata):
     # model = KAE(5000, 2500, 1000, 1000, 2500, 5000, args=args).to(device)
-    model = SDCN(500, 500, 2000, 2000, 500, 500,
+    model = scDKC(500, 500, 2000, 2000, 500, 500,
                  n_input=args.n_input,
                  n_z=args.n_z,
                  n_clusters=args.n_clusters,
@@ -367,10 +367,10 @@ def train_sdcn(runtime, y, datasetname, device, adata):
             res1 = tmp_q.cpu().numpy().argmax(1)  # Q
             # y_pred1,dist = kernel_kmeans(k.detach().cpu().numpy(), args.n_clusters)
             # y_pred,dist = kernel_kmeans(k, args.n_clusters)
-            # kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
-            # y_pred1 = kmeans.fit_predict(k.data.cpu().numpy())
-            y_pred1, _ = kmeans(k, num_clusters=args.n_clusters,  device=device)
-            y_pred1 = y_pred1.data.cpu().numpy()
+            kmeans = KMeans(n_clusters=args.n_clusters, n_init=20)
+            y_pred1 = kmeans.fit_predict(k.data.cpu().numpy())
+            # y_pred1, _ = kmeans(k, num_clusters=args.n_clusters,  device=device)
+            # y_pred1 = y_pred1.data.cpu().numpy()
 
             # pdatas = { 'k': k,'z': z}
             # eva1(y, y_pred1, pdatas, str(epoch) + 'Q', runtime, datasetname)
@@ -408,11 +408,11 @@ from time import time
 if __name__ == "__main__":
     con = sqlite3.connect("result.db")
     cur = con.cursor()
-    cur.execute("delete from sdcn ")
+    cur.execute("delete from sdcn")
     con.commit()
 
     #datasets = ['wiki']
-    datasets = ['Quake_10x_Spleen']
+    datasets = ['Quake_10x_Bladder']
     for dataset in datasets:
         batch = 2  # 运行轮次
         parser = argparse.ArgumentParser(
@@ -439,10 +439,10 @@ if __name__ == "__main__":
             args.n_input = 1000
             args.data_num = 1090
             args.k = None
-        if args.name == 'Romanov':
-            args.n_clusters = 6
+        if args.name == 'Quake_10x_Bladder':
+            args.n_clusters = 4
             args.n_input = 1000
-            args.data_num = 2881
+            args.data_num = 2500
             args.k = None
         if args.name == 'Quake_10x_Spleen':
             args.n_clusters = 5
@@ -527,7 +527,7 @@ if __name__ == "__main__":
             args.k = None
         print(args)
 
-        x, y = prepro(f"data/{args.name}/data.h5")
+        x, y = prepro(f"{args.name}/data.h5")
 
         if args.n_input > 0:
             importantGenes = geneSelection(x, n=args.n_input, plot=False)
@@ -554,10 +554,10 @@ if __name__ == "__main__":
         for i in range(batch):
             cur.execute("delete from sdcn where datasetname=? and batch=?", [args.name, i])
             con.commit()
-            train_sdcn(i, y, args.name, device, adata)
+            train_scDKC(i, y, args.name, device, adata)
         # _datasets = ['bbc', 'bbcsport']
     _datasets = ['Quake_Smart-seq2_Trachea', 'Quake_Smart-seq2_Limb_Muscle', 'QS_Limb_Muscle',
-                 'Quake_Smart-seq2_Diaphragm', 'Romanov','Chen', 'Quake_Smart-seq2_Lung','Plasschaert', 'Quake_Smart-seq2_Heart', 'Quake_10x_Trachea',
+                 'Quake_Smart-seq2_Diaphragm', 'Quake_10x_Bladder','Chen', 'Quake_Smart-seq2_Lung','Plasschaert', 'Quake_Smart-seq2_Heart', 'Quake_10x_Trachea',
                  'Pollen']
     for name in _datasets:
         datas = cur.execute(
