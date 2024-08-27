@@ -24,9 +24,9 @@ from torch.nn import Linear
 from GNN import GNNLayer
 from layers import MeanAct, DispAct, ZINBLoss
 from compute_kernels import compute_kernels, compute_kernelst, compute_kernelsp, compute_kernelsp1, compute_kernelsg
-from crsc_ik import crsc_ik, kernel_kmeans
+# from crsc_ik import crsc_ik, kernel_kmeans
 # from dis_point import calculate_dis
-from kernel_method import kernel_distance1
+# from kernel_method import kernel_distance1
 # from svm_margin_loss import filter_with_type
 import h5py
 import scanpy as sc
